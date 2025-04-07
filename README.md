@@ -15,10 +15,11 @@ The agent accepts a list of instructions and orchestrates these tools to perform
 
 ```text
 .
-├── transcribe.py       # Tool to transcribe YouTube videos
-├── news.py             # Tool to search news articles via API
-├── llm.py              # LLM loader and invoker (Ollama/OpenAI)
-├── agent.py            # Main script defining tools and running the agent
+├── src                 # Source folder
+   ├── transcribe.py      # Tool to transcribe YouTube videos
+   ├── news.py            # Tool to search news articles via API
+   ├── llm.py             # LLM loader and invoker (Ollama/OpenAI)
+   ├── agent.py           # Main script defining tools and running the agent
 ├── .env                # Environment variables (models, API keys, etc.)
 ├── requirements.txt    # Project dependencies
 └── files/              # Directory for temporary files (transcriptions)
@@ -52,6 +53,8 @@ The agent accepts a list of instructions and orchestrates these tools to perform
 4. **Configure environment variables**:
    Create a `.env` file in the project root with:
    ```dotenv
+   OLLAMA_API_URL=http://localhost:11434 # local ollama url
+   NEWS_API_KEY=news_api_key
    CONVERSATION_MODEL=llama2    # or another supported model
    OPENAI_API_KEY=your_openai_key
    ```
@@ -63,14 +66,14 @@ The agent accepts a list of instructions and orchestrates these tools to perform
 Run the agent with:
 
 ```bash
-python app.py
+python src/agent.py
 ```
 
 The agent will execute the workflow defined in `run_agent()` and output Markdown to the console, as well as save the result to `agent_output.md`.
 
 ### Example Instructions
 
-In `app.py`, `text_input` is a list of tasks for the agent:
+In `src/agent.py`, `text_input` is a list of tasks for the agent:
 
 ```python
 text_input = [
@@ -108,7 +111,7 @@ Each tool is decorated with `@tool` and returns a specific type, allowing the ag
 
 - **Models**: Change `CONVERSATION_MODEL` in `.env` to use different LLMs (e.g., `llama2`, `gpt-4o`).
 - **Temperature**: Adjust the `temperature` parameter when loading models in `LLM.load_ollama_model` or `LLM.load_open_ai_model`.
-- **Tools**: Add new functions decorated with `@tool` in `app.py` and include them in the `toolkit` list.
+- **Tools**: Add new functions decorated with `@tool` in `src/agent.py` and include them in the `toolkit` list.
 
 ---
 
