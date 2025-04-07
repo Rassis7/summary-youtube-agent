@@ -30,7 +30,7 @@ FILES_FOLDER_PATH = "files"
 @tool
 def transcribe_tool(url: str) -> str:
     """
-    Transcribes the YouTube video at the given URL.
+    This tool takes a YouTube video URL as input and generates a full transcription of the video's content.
 
     This tool takes a YouTube video URL as input and generates a full transcription of the video's content.
     It processes the video to extract spoken text and returns it as plain text. If the transcription fails
@@ -196,10 +196,9 @@ def run_agent():
     agent_executor = AgentExecutor(agent=agent, tools=toolkit, verbose=True)
 
     text_input = [
-        "Summarize the video at https://www.youtube.com/watch?v=pxhkDaKzBaY",
+        "Summarize the video at https://www.youtube.com/watch?v=qAF1NjEVHhY",
         "Search for 6 news articles related to the transcription.",
         "Save the summary, keywords and the news articles in portuguese (pt-BR).",
-        # "Return the summary, keywords and the news articles in portuguese (pt-BR).",
         # "Search for 5 news articles related follow text: 'Cars play a fundamental role in modern society, transforming the way we move around and interact with the world. Since their invention in the early 20th century, they have evolved from simple means of transportation to sophisticated machines packed with advanced technologies, comfort and innovative design. This evolution not only reflects industrial and technological progress, but also accompanies cultural and social changes, influencing lifestyles and the way we perceive mobility.'",
     ]
     result = agent_executor.invoke({"input": text_input})
