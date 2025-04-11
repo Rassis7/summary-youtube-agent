@@ -40,8 +40,7 @@ def transcribe_tool(url: str) -> str:
         url (str): The URL of the YouTube video to be transcribed. This should be a valid and accessible YouTube video link.
 
     Returns:
-        str: Return only the plain text of the video's transcription. Do not add any additional commentary, explanations, or formatting.
-             If the transcription fails or the input is invalid, return only an error message or fallback response.
+        str: Return only the plain text of the video's transcription
     """
     try:
         print("🎧 Transcribing video...")
@@ -80,7 +79,7 @@ def summarize_tool(transcription: str) -> str:
             SystemMessage(
                 content="""
                 Summarize the following video transcription concisely using bullet points:
-                - A brief overview of the video's main subject.
+                - A complete overview of the video's main subject.
                 - A list of the primary themes covered in the video, with each bullet point containing a short explanation of the theme.
                 - A final concluding bullet point that encapsulates the overall message or takeaway of the video.
                 """
@@ -196,14 +195,12 @@ def run_agent():
     agent_executor = AgentExecutor(agent=agent, tools=toolkit, verbose=True)
 
     text_input = [
-        "Summarize the video at https://www.youtube.com/watch?v=qAF1NjEVHhY",
+        "Transcript all video at https://www.youtube.com/watch?v=qAF1NjEVHhY",
         "Search for 6 news articles related to the transcription.",
-        "Save the summary, keywords and the news articles in portuguese (pt-BR).",
+        "Save the summary, keywords and and news articles in portuguese (pt-BR).",
         # "Search for 5 news articles related follow text: 'Cars play a fundamental role in modern society, transforming the way we move around and interact with the world. Since their invention in the early 20th century, they have evolved from simple means of transportation to sophisticated machines packed with advanced technologies, comfort and innovative design. This evolution not only reflects industrial and technological progress, but also accompanies cultural and social changes, influencing lifestyles and the way we perceive mobility.'",
     ]
-    result = agent_executor.invoke({"input": text_input})
-
-    print(result["output"])
+    agent_executor.invoke({"input": text_input})
 
 
 if __name__ == "__main__":
