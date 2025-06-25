@@ -14,6 +14,11 @@ from transcribe import (
 )
 from news import search_news
 from llm import LLM
+from transcribe_local_video import (
+    extract_audio_from_video,
+    transcribe_audio_to_text,
+    get_local_file,
+)
 
 
 from dotenv import load_dotenv
@@ -25,6 +30,42 @@ logger = logging.getLogger(__name__)
 
 model_name = os.getenv("CONVERSATION_MODEL", "llama2")
 FILES_FOLDER_PATH = "files"
+
+
+@tool
+def transcribe_local_video_tool(video_path: str, language="en-US") -> str:
+    """
+    This tool takes a local video file path as input and generates a full transcription of the video's content.
+
+    This tool takes a local video file path as input and generates a full transcription of the video's content.
+    It processes the video to extract spoken text and returns it as plain text. If the transcription fails
+    or the input URL is invalid, an appropriate error message or fallback response is returned.
+
+    Args:
+        video_path (str): The path to the local video file to be transcribed. This should be a valid and accessible file path.
+        language (str): The language of the audio in the video. Default is 'en-US' (Portuguese - Brazil).
+
+    Returns:
+        str: Return only the plain text of the video's transcription
+    """
+    try:
+        print("🎧 Transcribing local video...")
+        normalized_video_path = get_local_file(video_path)
+
+        audio_path = os.path.join(FILES_FOLDER_PATH, "audio.wav")
+        text_path = os.path.join(FILES_FOLDER_PATH, "transcription.txt")
+        extract_audio_from_video(normalized_video_path, audio_path)
+        transcribe_audio_to_text(audio_path, text_path, language=language)
+
+        with open(text_path, "r", encoding="utf-8") as f:
+            transcription = f.read()
+        if not transcription:
+            raise ValueError("Empty transcription received")
+        print("✅ Transcription completed successfully.")
+        return transcription
+    except Exception as e:
+        logger.error(f"Error in transcribe_tool: {e}")
+        return "I don't know"
 
 
 @tool
@@ -169,10 +210,16 @@ def save_tool(response: str) -> None:
         logger.error(f"Error in save_response: {e}")
 
 
-toolkit = [transcribe_tool, summarize_tool, search_news_tools, save_tool]
+toolkit = [
+    transcribe_tool,
+    transcribe_local_video_tool,
+    summarize_tool,
+    search_news_tools,
+    save_tool,
+]
 
 
-def run_agent():
+def run_agent(user_prompt: str) -> None:
     prompt = ChatPromptTemplate.from_messages(
         [
             (
@@ -194,14 +241,18 @@ def run_agent():
     agent = create_openai_functions_agent(agent_llm, toolkit, prompt)
     agent_executor = AgentExecutor(agent=agent, tools=toolkit, verbose=True)
 
-    text_input = [
-        "Transcript all video at https://www.youtube.com/watch?v=qAF1NjEVHhY",
-        "Search for 6 news articles related to the transcription.",
-        "Save the summary, keywords and and news articles in portuguese (pt-BR).",
-        # "Search for 5 news articles related follow text: 'Cars play a fundamental role in modern society, transforming the way we move around and interact with the world. Since their invention in the early 20th century, they have evolved from simple means of transportation to sophisticated machines packed with advanced technologies, comfort and innovative design. This evolution not only reflects industrial and technological progress, but also accompanies cultural and social changes, influencing lifestyles and the way we perceive mobility.'",
-    ]
-    agent_executor.invoke({"input": text_input})
+    text_input = [user_prompt]
+    response = agent_executor.invoke({"input": text_input})
+    print(response["output"])
 
 
 if __name__ == "__main__":
-    run_agent()
+    print("Bem-vindo ao chat! Digite 'sair' para encerrar.")
+
+    while True:
+        prompt = input("Você: ")
+        if prompt.lower() in ["sair", "exit", "quit"]:
+            print("Chat encerrado. Até mais!")
+            break
+
+        run_agent(prompt)
